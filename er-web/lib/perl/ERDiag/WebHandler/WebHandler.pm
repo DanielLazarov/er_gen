@@ -288,6 +288,7 @@ sub View($)
         login_page => \&ERDiag::WebViews::General::loginPage,
         home_page => \&ERDiag::WebViews::General::homePage,
         home_page_ajax => \&ERDiag::WebViews::General::homePageAjax,
+        load_schema => \&ERDiag::WebViews::Schemas::LoadSchema,
     };
 
     if(defined $$self{cgi}{view})
