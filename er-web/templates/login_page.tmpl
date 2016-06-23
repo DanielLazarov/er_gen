@@ -24,12 +24,15 @@
                 <TMPL_IF NAME="ERR">
                   <div id="error-alert" class="alert alert-danger col-sm-12"><TMPL_VAR NAME=MSG> <b><TMPL_VAR NAME=CODE DEFAULT=></b></div>
                 </TMPL_IF>
+                <TMPL_IF NAME="SUCCESS">
+                  <div id="success-alert" class="alert alert-success col-sm-12"><TMPL_VAR NAME=MSG> <b><TMPL_VAR NAME=CODE DEFAULT=></b></div>
+                </TMPL_IF>
               </div>
               
               <form id="loginform" class="form-horizontal" role="form" action="" method="POST">
                 <div style="margin-bottom: 25px" class="input-group">
                   <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                  <input id="login-username" type="text" class="form-control" name="username" value="" placeholder="username" required>                                        
+                  <input id="login-username" type="text" class="form-control" name="username" value="<TMPL_VAR NAME=USERNAME DEFAULT=>" placeholder="username" required>                                        
                 </div>
                       
                 <div style="margin-bottom: 25px" class="input-group">
@@ -44,9 +47,20 @@
                 </div>
                 <input type="hidden" name="view" value="home_page" />
                 <input type="hidden" name="action" value="login" />
-              </form> 
-            </div>                     
-          </div>  
+              </form>
+              <form id="registerform" class="form-horizontal" role="form" action="" method="POST">
+                <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
+                                            Don't have an account! 
+                                        <a href="#" onClick="$('#registerform').submit();">
+                                            Register Here
+                                        </a>
+                                        </div>
+                <input type="hidden" name="view" value="register_page" />
+                <input type="hidden" name="action" value="" />
+              </form>
+            </div> 
+
+            </div>
         </div>
       </div>
     </div>

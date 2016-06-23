@@ -34,12 +34,13 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
+                <a class="navbar-brand" id="brand-btn" style="padding: 10px 15px;" href="#"><img src="images/logo.png" style="height: 3rem;" alt="Cleaning"/></a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-left">
                     <li>
-                        <a id="clients-nav-btn" href="#"><b>My Diagrams</b></a>
+                        <a id="diagrams-nav-btn" href="#"><b>My Diagrams</b></a>
                     </li>
                 </ul>
                 <TMPL_IF NAME="LOGOUT">
@@ -57,13 +58,23 @@
       <div class="container" id="page-inner-container">
 </TMPL_IF>
 <div id="main-container" style="width: 100%;">
-  <div id="canvas-container" style="height: 100%; width: 100%;"></div>
+  <div id="diagram-name-container" style="margin-bottom: 0.5em;">
+    <input id="diagram-name" type="text" required value="<TMPL_VAR NAME=DIAGRAM_NAME DEFAULT='Untitled diagram'>" />
+  </div>
+  <div id="canvas-main-container" style="height: 90%; width: 100%; border: 1px solid #333; margin-bottom: 0.5em;">
+    <div id="canvas-container" style="height: 100%; width: 100%; "></div>
+  </div>
+  <div id="diagram-btn-container" style="height: 10%; width: 100%;">
+    <div class="col-sm-12 controls">
+      <a id="btn-login" href="#" class="btn btn-success" data-diagram-id="<TMPL_VAR NAME=DIAGRAM_ID DEFAULT=>">Save</a>
+    </div>
+  </div>
 </div>
 
 <script>
-  document.getElementById("main-container").style.height = (window.innerHeight - 73) + "px";
+  document.getElementById("main-container").style.height = (window.innerHeight - 105) + "px";
   var erDiag = new window.ERDiag();
-  erDiag.LoadDiag("main-container", JSON.parse('{"class":"go.GraphLinksModel","linkFromPortIdProperty":"fromPort","linkToPortIdProperty":"toPort","nodeDataArray":[{"key":"Record1","widths":[{"class":"NaN"},{"class":"NaN"},60],"fields":[{"name":"field1","info":"first field"},{"name":"field2","info":"the second one","color":"#F25022","figure":"LineH"},{"name":"fieldThree","info":"3rd","color":"#00BCF2","figure":"LineH"}],"loc":"0 0"},{"key":"Record2","widths":[{"class":"NaN"},{"class":"NaN"},{"class":"NaN"}],"fields":[{"name":"fieldA","info":"","color":"#F25022","figure":"Ellipse"},{"name":"fieldB","info":"","color":"#F25022","figure":"LineH"},{"name":"fieldC","info":"","color":"#7FBA00","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"}],"loc":"642.7532144977823 88.8708999557112"},{"key":"Record3","loc":"0 250","widths":[{"class":"NaN"},{"class":"NaN"},{"class":"NaN"}],"fields":[{"name":"fieldA1","info":"","color":"#F25022","figure":"Ellipse"},{"name":"fieldB2","info":"","color":"#7FBA00","figure":"LineH"},{"name":"fieldC3","info":"","color":"#7FBA00","figure":"LineH"},{"name":"fieldD4","info":"fourth","color":"#00BCF2","figure":"LineH"}]}],"linkDataArray":[{"from":"Record1","fromPort":"field1","to":"Record2","toPort":"fieldA"},{"from":"Record1","fromPort":"field2","to":"Record2","toPort":"fieldD"},{"from":"Record1","fromPort":"fieldThree","to":"Record2","toPort":"fieldB"}]}'));
+  erDiag.LoadDiag("canvas-container", JSON.parse('{"class":"go.GraphLinksModel","linkFromPortIdProperty":"fromPort","linkToPortIdProperty":"toPort","nodeDataArray":[{"key":"Record1","widths":[{"class":"NaN"},{"class":"NaN"},60],"fields":[{"name":"field1","info":"first field"},{"name":"field2","info":"the second one","color":"#F25022","figure":"LineH"},{"name":"fieldThree","info":"3rd","color":"#00BCF2","figure":"LineH"}],"loc":"0 0"},{"key":"Record2","widths":[{"class":"NaN"},{"class":"NaN"},{"class":"NaN"}],"fields":[{"name":"fieldA","info":"","color":"#F25022","figure":"Ellipse"},{"name":"fieldB","info":"","color":"#F25022","figure":"LineH"},{"name":"fieldC","info":"","color":"#7FBA00","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"},{"name":"fieldD","info":"fourth","color":"#00BCF2","figure":"LineH"}],"loc":"642.7532144977823 88.8708999557112"},{"key":"Record3","loc":"0 250","widths":[{"class":"NaN"},{"class":"NaN"},{"class":"NaN"}],"fields":[{"name":"fieldA1","info":"","color":"#F25022","figure":"Ellipse"},{"name":"fieldB2","info":"","color":"#7FBA00","figure":"LineH"},{"name":"fieldC3","info":"","color":"#7FBA00","figure":"LineH"},{"name":"fieldD4","info":"fourth","color":"#00BCF2","figure":"LineH"}]}],"linkDataArray":[{"from":"Record1","fromPort":"field1","to":"Record2","toPort":"fieldA"},{"from":"Record1","fromPort":"field2","to":"Record2","toPort":"fieldD"},{"from":"Record1","fromPort":"fieldThree","to":"Record2","toPort":"fieldB"}]}'));
 </script>
 <TMPL_IF NAME="HOME_FULL_BOTTOM">
       </div>

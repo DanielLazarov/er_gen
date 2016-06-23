@@ -14,7 +14,9 @@ use PerlLib::Security::Security;
 use ERDiag::Config::Config;
 
 use ERDiag::WebViews::General;
-use ERDiag::WebActions::General;
+use ERDiag::WebViews::Diagrams;
+
+use ERDiag::WebActions::Diagrams;
 
 sub handle($)
 {
@@ -62,7 +64,9 @@ sub Handler($)
     {
         my $sess_id = $$self{cgi_obj}->cookie("SESSID");
         my $username = $$self{cgi_obj}->cookie("USERNAME");
-        
+       
+        $$self{cgi}{sess_id} = $sess_id;
+        $$self{cgi}{username} = $$self{cgi}{username} // $username; 
         if($sess_id && $username)#Defined SESSID and USERNAME
         {
             #Check Session
@@ -129,20 +133,34 @@ sub Handler($)
 
                 $sess_id = $self->Login();
             }
+            elsif(defined $$self{cgi}{action} 
+                && defined $$self{cgi}{view} 
+                && $$self{cgi}{action} eq "register" 
+                && $$self{cgi}{view} eq "login_page")
+            {
+                $$self{success_register} = 1;
+            }
             else
             {#First GET without session
-                if($ERDiag::Config::Config::REQUIRE_LOGIN)
+                if(defined $$self{cgi}{view} && $$self{cgi}{view} eq "register_page")
                 {
                     $$self{cgi}{action} = undef;
-                    $$self{cgi}{view} = 'login_page';
                 }
                 else
                 {
-                    $username = "anon";
-                    $$self{cgi}{username} = $username;
-                    $$self{cgi}{action} = undef;
-                    $$self{cgi}{view} = 'home_page';
-                    $sess_id = $self->Login();
+                    if($ERDiag::Config::Config::REQUIRE_LOGIN)
+                    {
+                        $$self{cgi}{action} = undef;
+                        $$self{cgi}{view} = 'login_page';
+                    }   
+                    else
+                    {
+                        $username = "anon";
+                        $$self{cgi}{username} = $username;
+                        $$self{cgi}{action} = undef;
+                        $$self{cgi}{view} = 'home_page';
+                        $sess_id = $self->Login();
+                    }
                 }
             }
         }
@@ -225,8 +243,21 @@ sub Handler($)
             else
             {
                 $template = HTML::Template->new(filename => "/usr/share/er-diag/er-web/templates/login_page.tmpl");
-                $template->param(ERR => 1);
+                $template->param(
+                    ERR => 1,
+                    USERNAME => $$self{cgi}{username} // "",
+                );
             }
+        }
+        elsif($$self{cgi}{action} eq "register")
+        {
+            print CGI::header('text/html; charset=utf-8');
+            $template = HTML::Template->new(filename => "/usr/share/er-diag/er-web/templates/register_page.tmpl");
+            $template->param(
+                ERR => 1,
+                USERNAME => $$self{cgi}{username} // "",
+                EMAIL => $$self{cgi}{email} // ""
+            );
         }
         else
         {
@@ -265,6 +296,8 @@ sub Action($)
 
     my $actions_map = {
         login => \&NoOp,
+        register => \&Register,
+        delete_diagram => \&ERDiag::WebActions::Diagrams::DeleteDiagram
     };
 
     if(defined $$self{cgi}{action})
@@ -286,9 +319,10 @@ sub View($)
 
     my $views_map = {
         login_page => \&ERDiag::WebViews::General::loginPage,
+        register_page => \&ERDiag::WebViews::General::registerPage,
         home_page => \&ERDiag::WebViews::General::homePage,
-        home_page_ajax => \&ERDiag::WebViews::General::homePageAjax,
-        load_schema => \&ERDiag::WebViews::Schemas::LoadSchema,
+        home_page_ajax => \&ERDiag::WebViews::General::homePage,
+        all_diagrams => \&ERDiag::WebViews::Diagrams::AllDiagrams,
     };
 
     if(defined $$self{cgi}{view})
@@ -336,6 +370,14 @@ sub Logout($$)
     
     my $ended_sess_id = PerlLib::Security::Security::expireSession($self, $sess_id);
     ASSERT(defined $ended_sess_id);
+}
+
+sub Register($)
+{
+    my ($self) = @_;
+
+    ASSERT_USER($$self{cgi}{password} eq $$self{cgi}{retype_password}, "Retype password mismatch");
+    PerlLib::Security::Security::createUser({dbh => $$self{dbh}}, $$self{cgi}{username}, $$self{cgi}{password}, $$self{cgi}{email});
 }
 
 1;

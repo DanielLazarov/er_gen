@@ -1,0 +1,37 @@
+<div id="all-diagrams-container">
+  <div id="all-diagrams-table-container'">
+    <h3>My Diagrams</h3>
+    <table class="table table-bordered table-striped">
+      <tbody>
+        <tr>
+          <th class="btnonly-cell">
+            <button type="button" class="btn btn-xs btn-success crud-create-btn">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+          </th>
+          <th>Diagram name</th>
+          <th class="btnonly-cell"></th>
+        </tr>
+
+        <TMPL_LOOP NAME="TR_LOOP">
+        <tr data-unique-identifier='<TMPL_VAR NAME="UNIQUE_IDENTIFIER">' data-name='<TMPL_VAR NAME="DIAGRAM_NAME">'>
+          <td class="btnonly-cell">
+            <button type="button" class="btn btn-xs btn-primary crud-update-btn">
+              <span class="glyphicon glyphicon-pencil"></span>
+            </button>
+          </td>
+
+          <td>
+            <TMPL_VAR NAME="DIAGRAM_NAME">
+          </td>
+          <td>
+            <button type="button" class="btn btn-xs btn-danger crud-delete-btn">
+              <span class="glyphicon glyphicon-trash"></span>
+            </button>
+          </td>
+        </tr>
+        </TMPL_LOOP>
+      </tbody>
+    </table>
+  </div>
+</div>

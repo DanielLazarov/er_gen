@@ -1,9 +1,9 @@
-window.CLEANING = {};//Main Cleaning Obj.
+window.ER = {};//Main ER Obj.
 
 //Generic request settings
-CLEANING.default_container = '#page-inner-container';
-CLEANING.default_err_container = '#err-container';
-CLEANING.ajaxRequest = new AjaxRequest({
+ER.default_container = '#page-inner-container';
+ER.default_err_container = '#err-container';
+ER.ajaxRequest = new AjaxRequest({
   dataType : 'html',
   contentType : 'application/x-www-form-urlencoded; charset=UTF-8',
   url : '',
@@ -13,12 +13,14 @@ CLEANING.ajaxRequest = new AjaxRequest({
   error : function(jqXHR, textStatus, errorThrown){
     var msg = (textStatus && textStatus != null ? textStatus : 'Connection error');
     var code = (errorThrown && errorThrown != null ? errorThrown : '');
-    $(CLEANING.default_err_container).html(generateError(msg, code));
-    $(CLEANING.default_err_container).fadeIn('slow')
+    $(ER.default_err_container).html(generateError(msg, code));
+    $(ER.default_err_container).fadeIn('slow')
   },
   processData : true,
   async : true
 });
+
+console.log(ER.ajaxRequest);
 
 function showLoadingModal(){
   $('#loading-modal').show();
@@ -29,15 +31,17 @@ function hideLoadingModal(){
 }
 
 function defaultRequest(params){
-  CLEANING.ajaxRequest.sendRequest({
+  console.log(ER);
+
+  ER.ajaxRequest.sendRequest({
     data : params,
     success : function(data){
       if(data.indexOf('error-alert') > -1){
-        $(CLEANING.default_err_container).html(data);
-        $(CLEANING.default_err_container).fadeIn('slow');
+        $(ER.default_err_container).html(data);
+        $(ER.default_err_container).fadeIn('slow');
       } else {
-        $(CLEANING.default_err_container).html('');
-        $(CLEANING.default_container).html(data);
+        $(ER.default_err_container).html('');
+        $(ER.default_container).html(data);
       }
     }
   });
@@ -94,134 +98,55 @@ function saveHistoryAndSubmit(state){
 function submitRequestState(state){
   if(state != null){
     switch(state.method){
-      case 'all_clients': allClients(state.params);
-        break;
-      case 'all_quotes': allQuotes(state.params);
+      case 'all_diagrams': allDiagrams(state.params);
         break;
       case 'home_page_ajax': homePageAjax(state.params);
-        break;
-      case 'all_teams': allTeams(state.params);
         break;
     }
   }
 }
 
 
-
 //Event handlers
+$(document).on('click', '#diagrams-nav-btn', function(){
+  saveHistoryAndSubmit({method : 'all_diagrams'});
+});
 $(document).on('click', '#brand-btn', function(){
   saveHistoryAndSubmit({method : 'home_page_ajax'});
 });
-$(document).on('click', '#clients-nav-btn', function(){
-  saveHistoryAndSubmit({method : 'all_clients'});
-});
-$(document).on('click', '#quotes-nav-btn', function(){
-  saveHistoryAndSubmit({method : 'all_quotes'});
-});
-$(document).on('click', '#teams-nav-btn', function(){
-  saveHistoryAndSubmit({method : 'all_teams'});
-});
-
 $(document).on('click', '#logout-btn', function(){
   $('#logout-form').submit();
 });
 
-
-
-//Functions
-function homePageAjax(){
-  defaultRequest({'view' : 'home_page_ajax'});
-}
-
-function allClients(){
-  defaultRequest({'view' : 'all_clients'});
-}
-
-function allQuotes(){
-  defaultRequest({'view' : 'all_quotes'});
-}
-
-function allTeams(){
-  defaultRequest({'view' : 'all_teams'});
-}
-
-//CRUD
 $(document).on('click', '.crud-create-btn', function(){
-  crudCreate($(this));
+  crudCreateUpdate(undefined);
 });
 $(document).on('click', '.crud-update-btn', function(){
-  crudUpdate($(this));
+  crudCreateUpdate($(this));
 });
 $(document).on('click', '.crud-delete-btn', function(){
   crudDelete($(this));
 });
-$(document).on('submit', '.crud-form', function(e){
-  e.preventDefault();
-  crudSubmitCreateOrUpdate($(this));
-});
-$(document).on('click', '.crud-td-file', function(){
-  crudFile($(this));
-});
 
-function crudCreate($elem){
+
+function crudCreateUpdate($elem){
   var query_params = {
-    view : 'crud_create',
-    table : $elem.closest('.crud-table').data('table')
+    view : 'home_page_ajax'
   };
 
-  CLEANING.ajaxRequest.sendRequest({
+  if(typeof $elem !== 'undefined') {
+    query_params.diagram_id = $elem.closest('tr').data('unique-identifier');
+  }
+
+  ER.ajaxRequest.sendRequest({
     data : query_params,
     success : function(data){
       if(data.indexOf('error-alert') > -1){
-        $(CLEANING.default_err_container).html(data);
-        $(CLEANING.default_err_container).fadeIn('slow');
+        $(ER.default_err_container).html(data);
+        $(ER.default_err_container).fadeIn('slow');
       } else {
-        $(CLEANING.default_err_container).html('');
-        $('#crud-form-container-' + $elem.closest('.crud-table').data('table')).html(data);
-      }
-    }
-  });
-}
-
-function crudSubmitCreateOrUpdate($form)
-{
-  var query_params = $form.serialize();
-  console.log(JSON.stringify(query_params));
-  CLEANING.ajaxRequest.sendRequest({
-    data : query_params,
-    success : function(data){
-      if(data.indexOf('error-alert') > -1){
-        $(CLEANING.default_err_container).html(data);
-        $(CLEANING.default_err_container).fadeIn('slow');
-      } else {
-        $(CLEANING.default_err_container).html('');
-        $('#crud-container-' + $form.data('table')).html(data);
-      }
-    }
-  });
-}
-
-function crudSubmitUpdate($elem)
-{
-
-}
-
-function crudUpdate($elem){
-  var query_params = {
-    view : 'crud_update',
-    table : $elem.closest('.crud-table').data('table'),
-    unique_identifier : $elem.closest('tr').data('unique-identifier'),
-  };
-
-  CLEANING.ajaxRequest.sendRequest({
-    data : query_params,
-    success : function(data){
-      if(data.indexOf('error-alert') > -1){
-        $(CLEANING.default_err_container).html(data);
-        $(CLEANING.default_err_container).fadeIn('slow');
-      } else {
-        $(CLEANING.default_err_container).html('');
-        $('#crud-form-container-' + $elem.closest('.crud-table').data('table')).html(data);
+        $(ER.default_err_container).html('');
+        $(ER.default_container).html(data);
       }
     }
   });
@@ -229,23 +154,22 @@ function crudUpdate($elem){
 
 function crudDelete($elem){
   var query_params = {
-    action : 'crud_delete',
-    view : 'crud_table',
-    table : $elem.closest('.crud-table').data('table'),
-    unique_identifier : $elem.closest('tr').data('unique-identifier'),
+    action : 'delete_diagram',
+    view : 'all_diagrams',
+    diagram_id : $elem.closest('tr').data('unique-identifier'),
   };
 
-  var confirmation = confirm("Delete entry?");
+  var confirmation = confirm('Delete diagram ' + '"' + $elem.closest('tr').data('name') + '"?');
   if (confirmation) {
-    CLEANING.ajaxRequest.sendRequest({
+    ER.ajaxRequest.sendRequest({
       data : query_params,
       success : function(data){
         if(data.indexOf('error-alert') > -1){
-          $(CLEANING.default_err_container).html(data);
-          $(CLEANING.default_err_container).fadeIn('slow');
+          $(ER.default_err_container).html(data);
+          $(ER.default_err_container).fadeIn('slow');
         } else {
-          $(CLEANING.default_err_container).html('');
-          $('#crud-container-' + $elem.closest('.crud-table').data('table')).html(data);
+          $(ER.default_err_container).html('');
+          $(ER.default_container).html(data);
         }
       }
     });
@@ -255,7 +179,14 @@ function crudDelete($elem){
 }
 
 
-function crudFile($elem){
-  var $form = $('<form method="POST" action=""><input type="hidden" name="view" value="crud_file"/>  <form><input type="hidden" name="file_path" value="' + $elem.data('filepath') + '"/>  <form><input type="hidden" name="file_type" value="' + $elem.data('filetype') + '"/>  </form>');
-  $form.submit();
-} 
+//Functions
+function homePageAjax(){
+  defaultRequest({'view' : 'home_page_ajax'});
+}
+
+function allDiagrams(){
+  defaultRequest({'view' : 'all_diagrams'});
+}
+
+
+

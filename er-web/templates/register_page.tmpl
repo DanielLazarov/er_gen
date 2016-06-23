@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="shortcut icon" href="favicon.ico">
+    <title>ERDiag</title>
+    <script src="js/libs/jquery-1.12.0/jquery-1.12.0.min.js"></script>
+    <script src="js/libs/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="js/libs/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/main.css">
+  </head>
+  <body>
+      <div id="page-container">
+      <div class="container">    
+        <div id="loginbox" style="margin-top:50px;" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">                    
+        <div class="panel panel-info" >
+            <div class="panel-heading">
+              <div class="panel-title">Register</div>
+              <div style="float:right; font-size: 80%; position: relative; top:-10px" onClick="$('#loginform').submit();"><a href="#">Back to login</a></div>
+            </div>     
+            <div style="padding-top:30px" class="panel-body" >
+
+              <div id="err-container">
+
+                <TMPL_IF NAME="ERR">
+                  <div id="error-alert" class="alert alert-danger col-sm-12"><TMPL_VAR NAME=MSG> <b><TMPL_VAR NAME=CODE DEFAULT=></b></div>
+                </TMPL_IF>
+                
+              </div>
+              
+
+              <form id="registration form" class="form-horizontal" role="form" action="" method="POST">
+                <div style="margin-bottom: 25px" class="input-group ">
+                  <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                  <input id="username" type="text" class="form-control" name="username" value="<TMPL_VAR NAME=USERNAME DEFAULT=>" placeholder="Username" required>                                        
+                </div>
+
+                <div style="margin-bottom: 25px" class="input-group">
+                  <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+                  <input id="email" type="email" class="form-control" name="email" value="<TMPL_VAR NAME=EMAIL DEFAULT=>" placeholder="Email" required>                                        
+                </div>
+                      
+                <div style="margin-bottom: 25px" class="input-group">
+                  <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                  <input id="password" type="password" class="form-control" name="password" placeholder="Password" required>
+                </div>
+
+                <div style="margin-bottom: 25px" class="input-group">
+                  <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                  <input id="retype-password" type="password" class="form-control" name="retype_password" placeholder="Retype password" required>
+                </div>
+
+                <small id="password-err" style="color: red; display: none" class="text-muted">
+                  Password mismatch.
+                </small>
+
+                <div style="margin-top:10px" class="form-group">
+                  <div class="col-sm-12 controls">
+                    <input type="submit" name="login_btn" class="btn btn-success btn-block" value="Register" />
+                  </div>
+                </div>
+                <input type="hidden" name="view" value="login_page" />
+                <input type="hidden" name="action" value="register" />
+              </form> 
+
+              <form id="loginform" class="form-horizontal" role="form" action="" method="POST">
+                <input type="hidden" name="view" value="login_page" />
+                <input type="hidden" name="action" value="" />
+              </form>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .pw-error {
+        border: 1px solid red;
+      }
+    </style>
+    <script>
+    $(document).on('keyup', '#retype-password', function(){
+      if($('#password').val() != $('#retype-password').val()) {
+        $('#retype-password').addClass('pw-error');
+        $('#password').addClass('pw-error');
+        $('#password-err').show();
+      } else {
+        $('#retype-password').removeClass('pw-error');
+        $('#password').removeClass('pw-error');
+        $('#password-err').hide(); 
+      }
+    });
+    </script>
+  </body>
+</html>
+
+
+  
