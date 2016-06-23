@@ -7,6 +7,8 @@ use PerlLib::Errors::Errors;
 
 use ERDiag::Config::Config;
 
+use ERDiag::Utils::SchemaJSONParser;
+
 sub AllDiagrams($)
 {
     my ($app) = @_;
@@ -33,6 +35,19 @@ sub AllDiagrams($)
 
     $template->param(
         TR_LOOP => $rows_arrref
+    );
+
+    return $template->output();
+}
+
+sub SaveDiagram($)
+{
+    my ($app) = @_;
+
+    my $template = HTML::Template->new(filename => "/usr/share/er-diag/er-web/templates/success.tmpl");
+
+    $template->param(
+        MSG => "Saved."
     );
 
     return $template->output();

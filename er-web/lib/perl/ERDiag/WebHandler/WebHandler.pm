@@ -297,7 +297,8 @@ sub Action($)
     my $actions_map = {
         login => \&NoOp,
         register => \&Register,
-        delete_diagram => \&ERDiag::WebActions::Diagrams::DeleteDiagram
+        delete_diagram => \&ERDiag::WebActions::Diagrams::DeleteDiagram,
+        create_or_update_diagram => \&ERDiag::WebActions::Diagrams::CreateOrUpdateDiagram
     };
 
     if(defined $$self{cgi}{action})
@@ -323,6 +324,7 @@ sub View($)
         home_page => \&ERDiag::WebViews::General::homePage,
         home_page_ajax => \&ERDiag::WebViews::General::homePage,
         all_diagrams => \&ERDiag::WebViews::Diagrams::AllDiagrams,
+        save_diagram => \&ERDiag::WebViews::Diagrams::SaveDiagram,
     };
 
     if(defined $$self{cgi}{view})

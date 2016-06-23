@@ -128,6 +128,10 @@ $(document).on('click', '.crud-delete-btn', function(){
   crudDelete($(this));
 });
 
+$(document).on('click', '#save-btn', function(){
+  submitCreateUpdate(false);
+});
+
 
 function crudCreateUpdate($elem){
   var query_params = {
@@ -150,6 +154,38 @@ function crudCreateUpdate($elem){
       }
     }
   });
+}
+
+function submitCreateUpdate(silent){
+  var query_params = {
+    view : 'save_diagram',
+    action: 'create_or_update_diagram',
+    schema_json : ER.erDiag.diag.model.toJson()
+  };
+
+  if($('#save-btn').data('diagram-id')) {
+    query_params.diagram_id = $('#save-btn').data('diagram-id');
+  }
+
+  var req_settings = {
+    data : query_params,
+    success : function(data){
+      if(data.indexOf('error-alert') > -1){
+        $(ER.default_err_container).html(data);
+        $(ER.default_err_container).fadeIn('slow');
+      } else {
+        $(ER.default_err_container).html(data);
+        $(ER.default_err_container).fadeIn('slow');
+      }
+    }
+  }
+  if(silent)
+  {
+    req_settings.error = function(){};
+  }
+
+  ER.ajaxRequest.sendRequest(req_settings);
+
 }
 
 function crudDelete($elem){

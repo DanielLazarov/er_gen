@@ -131,27 +131,28 @@
   }
 
   ERDiag.prototype.LoadDiag = function(container_id, data) {
-    var diag = go.GraphObject.make(go.Diagram, container_id,{
+    var self = this;
+    self.diag = go.GraphObject.make(go.Diagram, container_id,{
                   initialContentAlignment: go.Spot.Center,//set items in center if no position is specified
                   initialAutoScale: go.Diagram.Uniform,//Auto scale (zoom to fit)
                   validCycle: go.Diagram.CycleAll,  //allow loops
                   "undoManager.isEnabled": false //dont allow history manager for now
     });
-    diag.toolManager.mouseDownTools.add(new RowResizingTool());//row resize tool
-    diag.toolManager.mouseDownTools.add(new ColumnResizingTool());//col resize tool
+    self.diag.toolManager.mouseDownTools.add(new RowResizingTool());//row resize tool
+    self.diag.toolManager.mouseDownTools.add(new ColumnResizingTool());//col resize tool
 
           // This template represents a whole "record".
-    diag.nodeTemplate = this.nodeTemplate
-    diag.linkTemplate = this.linkTemplate
+    self.diag.nodeTemplate = this.nodeTemplate
+    self.diag.linkTemplate = this.linkTemplate
 
-      diag.model =
+      self.diag.model =
         go.GraphObject.make(go.GraphLinksModel,
           {
             linkFromPortIdProperty: "fromPort",
             linkToPortIdProperty: "toPort",
             // automatically update the model that is shown on this page
             "Changed": function(e) {
-              console.log(diag.model.toJson());
+              console.log(self.diag.model.toJson());
               //if (e.isTransactionFinished) showModel();
             },
             nodeDataArray: data.nodeDataArray,
@@ -159,6 +160,24 @@
           });
 
   };
+
+  ERDiag.prototype.ReLoadDiag = function(data) {
+    var self = this;
+      self.diag.model =
+        go.GraphObject.make(go.GraphLinksModel,
+          {
+            linkFromPortIdProperty: "fromPort",
+            linkToPortIdProperty: "toPort",
+            // automatically update the model that is shown on this page
+            "Changed": function(e) {
+              console.log(self.diag.model.toJson());
+              //if (e.isTransactionFinished) showModel();
+            },
+            nodeDataArray: data.nodeDataArray,
+            linkDataArray: data.linkDataArray
+          });
+  };
+
      
     window.ERDiag = ERDiag;
 })(window);

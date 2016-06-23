@@ -5,6 +5,7 @@ use strict;
 use HTML::Template;
 use PerlLib::Errors::Errors;
 
+use ERDiag::Utils::SchemaJSONParser;
 
 sub loginPage($)
 {
@@ -42,7 +43,13 @@ sub homePage($)
     my $diagram_name;
     my $diagram_id;
     my $schema_json;
-    if(defined $$app{cgi}{diagram_id} && ! defined $$app{cgi}{action})
+    if(defined $$app{diagram_row})
+    {
+        $diagram_name = $$app{diagram_row}{name};
+        $diagram_id = $$app{diagram_row}{diagram_id};
+        $schema_json = $$app{diagram_row}{schema_json};
+    }
+    elsif(defined $$app{cgi}{diagram_id} && ! defined $$app{cgi}{action})
     {
         my $sth = $$app{dbh}->prepare(q{
             SELECT *
@@ -100,13 +107,16 @@ sub homePage($)
         }
     }
 
+    $schema_json = ERDiag::Utils::SchemaJSONParser::ToWeb($schema_json);
+    
     $template->param(
         USERNAME => $username,
         HOME_FULL_TOP => $is_full_page,
         HOME_FULL_BOTTOM => $is_full_page,
         LOGOUT => $ERDiag::Config::Config::REQUIRE_LOGIN,
         DIAGRAM_NAME => $diagram_name,
-        DIAGRAM_ID => $diagram_id
+        DIAGRAM_ID => $diagram_id,
+        SCHEMA_JSON => $schema_json
     );
     
     return $template->output();
