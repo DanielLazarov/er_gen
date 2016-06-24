@@ -73,20 +73,15 @@
         </div>
       </div>
     </div>
-    <style>
-      .pw-error {
-        border: 1px solid red;
-      }
-    </style>
     <script>
     $(document).on('keyup', '#retype-password', function(){
       if($('#password').val() != $('#retype-password').val()) {
-        $('#retype-password').addClass('pw-error');
-        $('#password').addClass('pw-error');
+        $('#retype-password').addClass('input-error');
+        $('#password').addClass('input-error');
         $('#password-err').show();
       } else {
-        $('#retype-password').removeClass('pw-error');
-        $('#password').removeClass('pw-error');
+        $('#retype-password').removeClass('input-error');
+        $('#password').removeClass('input-error');
         $('#password-err').hide(); 
       }
     });

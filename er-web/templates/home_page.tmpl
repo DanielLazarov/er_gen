@@ -65,16 +65,192 @@
     <div id="canvas-container" style="height: 100%; width: 100%; "></div>
   </div>
   <div id="diagram-btn-container" style="height: 10%; width: 100%;">
+
     <div class="col-sm-12 controls">
       <a id="save-btn" href="#" class="btn btn-success" data-diagram-id="<TMPL_VAR NAME=DIAGRAM_ID DEFAULT=>">Save</a>
+      
+      <TMPL_IF NAME="NEW_DIAGRAM">
+        <a id="import-btn" href="#" class="btn btn-primary" data-toggle="modal" data-target="#import-from-ddl-modal">Import from DDL</a>
+        <TMPL_ELSE>
+        <a id="download-btn" href="#" class="btn btn-warning">Save as Image</a>
+        <div id="hidden-download-div" style="position:absolute; z-index: -100; top:-10000px; height: 2000px; width: 2000px;"></div>
+      </TMPL_IF>
+      
+      <a id="remove-column-btn" style="float:right; margin-left:0.5em;" href="#" class="btn btn-danger disabled" data-toggle="modal" data-target="#remove-column-modal">Remove column</a>
+      <a id="remove-table-btn" style="float:right; margin-left:0.5em;" href="#" class="btn btn-danger disabled" data-toggle="modal" data-target="#remove-table-modal">Remove table</a>
+      <a id="add-column-btn" style="float:right; margin-left:0.5em;" href="#" class="btn btn-primary disabled" data-toggle="modal" data-target="#add-column-modal">Add column</a>
+      <a id="add-table-btn" style="float:right; margin-left:0.5em;" href="#" class="btn btn-primary" data-toggle="modal" data-target="#add-table-modal">Add table</a>
     </div>
+
+    <div class="modal fade" id="add-table-modal" tabindex="-1" role="dialog" aria-labelledby="Add table">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Add table</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="add-table-name-input">Table name: </label>
+              <input type="text" id="add-table-name-input" class="form-control" required/>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success" id="submit-add-table-btn">Add table</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="remove-table-modal" tabindex="-1" role="dialog" aria-labelledby="Remove table">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Remove table <b>"<span id="remove-table-name-holder"></span>"</b>?</h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="submit-remove-table-btn" data-dismiss="modal">Remove</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="remove-column-modal" tabindex="-1" role="dialog" aria-labelledby="Remove column">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Remove column from table <b>"<span id="remove-column-table-name-holder"></span>"</b></h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="add-table-name-input">Column name: </label>
+              <input type="text" id="remove-column-name-input" class="form-control" required/>
+            </div>
+            <span id="remove-column-err" style="color: red; display: none;">Specified column does not exist!</span>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="submit-remove-column-btn">Remove column</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="add-column-modal" tabindex="-1" role="dialog" aria-labelledby="Add column">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Add column for table <b>"<span id="add-column-table-name-holder"></span>"</b></h4>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-group">
+              <label for="add-column-name-input">Column name: </label>
+              <input type="text" id="add-column-name-input" class="form-control" required/>
+            </div>
+
+            <div class="form-group">
+              <label for="add-column-type-select">Type: </label>
+              <select id="add-column-type-select" class="form-control">
+                <option value="integer">integer</option>
+                <option value="text">text</option>
+                <option value="boolean">boolean</option>
+                <option value="timestamp">timestamp</option>
+                <option value="numeric">numeric</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="add-column-default-input">Default value: </label>
+              <input type="text" id="add-column-default-input" class="form-control" required/>
+            </div>
+
+            <div class="form-group">
+              <label>Key type: </label>
+              <label class="radio-inline"><input id="add-column-key-type-none" type="radio" name="optradio" checked="checked">None</label>
+              <label class="radio-inline"><input id="add-column-key-type-pk" type="radio" name="optradio">Primary key</label>
+              <label class="radio-inline"><input id="add-column-key-type-fk" type="radio" name="optradio">Foreign key</label>
+            </div>
+
+            <div class="form-group">
+              <label for="add-column-constr-u">Unique: </label>
+              <input type="checkbox" id="add-column-constr-u"/>
+            </div>
+
+            <div class="form-group">
+              <label for="add-column-constr-nn">Not null: </label>
+              <input type="checkbox" id="add-column-constr-nn"/>
+            </div>
+
+            
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success" id="submit-add-column-btn">Add column</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="import-from-ddl-modal" tabindex="-1" role="dialog" aria-labelledby="Import from DDL">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Import from DDL</h4>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-group">
+              <label for="import-from-ddl-input">DDL: </label>
+              <textarea id="import-from-ddl-input" class="form-control" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="import-from-ddl-dialect">Dialect: </label>
+              <select id="import-from-ddl-dialect" class="form-control"> 
+                <option value="SQLite">SQLite</option>
+                <option value="MySQL">MySQL</option>
+                <option value="PostgreSQL">PostgreSQL</option>
+                <option value="SQLServer">SQLServer</option>
+                <option value="Oracle">Oracle</option>
+              </select>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success" id="submit-import-from-ddl-btn">Import</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
+
 <div id="script-container">
   <script>
     document.getElementById("main-container").style.height = (window.innerHeight - 105) + "px";
     ER.erDiag = new window.ERDiag();
-    ER.erDiag.LoadDiag("canvas-container", JSON.parse('<TMPL_VAR NAME=SCHEMA_JSON DEFAULT=>'));
+    
+    ER.erDiag.LoadDiag("canvas-container", JSON.parse('<TMPL_VAR NAME=SCHEMA_JSON DEFAULT={"linkDataArray":[],"nodeDataArray":[]}>'));
+
+    ER.erDiag.diag.addDiagramListener('ChangedSelection', function(){
+        var selection = ER.erDiag.diag.selection.first();
+        if(selection === null) {
+          $('#remove-table-btn').addClass('disabled');
+          $('#remove-column-btn').addClass('disabled');
+          $('#add-column-btn').addClass('disabled');
+        } else if(selection instanceof go.Node) {
+          $('#remove-table-btn').removeClass('disabled');
+          $('#remove-column-btn').removeClass('disabled');
+          $('#add-column-btn').removeClass('disabled');
+        }
+     });
+    
   </script>
 </div>
 <TMPL_IF NAME="HOME_FULL_BOTTOM">

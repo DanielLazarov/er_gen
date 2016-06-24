@@ -43,7 +43,11 @@ sub homePage($)
     my $diagram_name;
     my $diagram_id;
     my $schema_json;
-    if(defined $$app{diagram_row})
+    if($$app{cgi}{new_diagram})
+    {
+        #Dont load anything.
+    }
+    elsif(defined $$app{diagram_row})
     {
         $diagram_name = $$app{diagram_row}{name};
         $diagram_id = $$app{diagram_row}{diagram_id};
@@ -107,8 +111,15 @@ sub homePage($)
         }
     }
 
-    $schema_json = ERDiag::Utils::SchemaJSONParser::ToWeb($schema_json);
-    
+    if(defined $schema_json)
+    {
+        $schema_json = ERDiag::Utils::SchemaJSONParser::FromSchemaToWeb($schema_json);
+    }
+    else
+    {
+        $$app{cgi}{new_diagram} = 1;
+    }
+
     $template->param(
         USERNAME => $username,
         HOME_FULL_TOP => $is_full_page,
@@ -116,7 +127,8 @@ sub homePage($)
         LOGOUT => $ERDiag::Config::Config::REQUIRE_LOGIN,
         DIAGRAM_NAME => $diagram_name,
         DIAGRAM_ID => $diagram_id,
-        SCHEMA_JSON => $schema_json
+        SCHEMA_JSON => $schema_json,
+        NEW_DIAGRAM => $$app{cgi}{new_diagram}
     );
     
     return $template->output();

@@ -24,20 +24,31 @@ sub CreateOrUpdateDiagram($)
 {
     my ($app) = @_;
 
-    ASSERT(defined $$app{cgi}{schema_json});
+    my $parsed_schema;
+    if( defined $$app{cgi}{schema_json})
+    {
+        $parsed_schema = ERDiag::Utils::SchemaJSONParser::FromWebToSchema($$app{cgi}{schema_json});
+    }
+    elsif( defined $$app{cgi}{ddl} && defined $$app{cgi}{dialect})
+    {
+        $parsed_schema = ERDiag::Utils::SchemaJSONParser::FromDDLToSchema($$app{cgi}{ddl}, $$app{cgi}{dialect});
+    }
+    else
+    {
+        ASSERT(0);
+    }
 
-    my $parsed_schema = ERDiag::Utils::SchemaJSONParser::FromWeb($$app{cgi}{schema_json});
-    
     my $sth;
     if(defined $$app{cgi}{diagram_id})#Update
     {
         $sth = $$app{dbh}->prepare(q{
             UPDATE diagrams
-            SET schema_json = ?
+            SET schema_json = ?,
+                name = ?
             WHERE diagram_id = ?
             RETURNING * 
         });
-        $sth->execute($parsed_schema, $$app{cgi}{diagram_id});
+        $sth->execute($parsed_schema, $$app{cgi}{diagram_name}, $$app{cgi}{diagram_id});
         ASSERT($sth->rows == 1);
     }
     else

@@ -132,6 +132,110 @@ $(document).on('click', '#save-btn', function(){
   submitCreateUpdate(false);
 });
 
+$(document).on('click', '#submit-add-table-btn', function(){
+  var name = $('#add-table-name-input').val();
+
+  if( ! name) {
+    $('#add-table-name-input').addClass('input-error');
+    return false;
+  } else {
+    $('#add-table-name-input').removeClass('input-error');
+    $('#add-table-modal').modal('toggle');
+    ER.erDiag.AddNode(name);
+  }
+});
+
+$(document).on('click', '#remove-table-btn', function(){
+  $('#remove-table-name-holder').html(ER.erDiag.selection.data.key);
+});
+$(document).on('click', '#submit-remove-table-btn', function(){
+  ER.erDiag.RemoveNode(ER.erDiag.selection);
+});
+
+$(document).on('click', '#remove-column-btn', function(){
+  $('#remove-column-table-name-holder').html(ER.erDiag.selection.data.key);
+});
+$(document).on('click', '#submit-remove-column-btn', function(){
+  var name = $('#remove-column-name-input').val();
+
+  if( ! name) {
+    $('#remove-column-name-input').addClass('input-error');
+    return false;
+  } else if( ! ER.erDiag.RemoveColumn(ER.erDiag.selection, name)) {
+    $('#remove-column-name-input').addClass('input-error');
+    $('#remove-column-err').show();
+    return false;
+  } else {
+    $('#remove-column-err').hide();
+    $('#remove-column-name-input').removeClass('input-error');
+    $('#remove-column-modal').modal('toggle');
+    ER.erDiag.RemoveColumn(ER.erDiag.selection, name);
+  }
+});
+
+$(document).on('click', '#add-column-btn', function(){
+  $('#add-column-table-name-holder').html(ER.erDiag.selection.data.key);
+});
+
+$(document).on('click', '#submit-add-column-btn', function(){
+  
+  var name = $('#add-column-name-input').val();
+  if( ! name) {
+    $('#add-column-name-input').addClass('input-error');
+    return false;
+  } 
+  var col_info = {
+    name : name,
+    type : $('#add-column-type-select').val(),
+    "default" : $('#add-column-default-input').val()
+  };
+
+  var constraints = new Array();
+  if($('#add-column-constr-u').is(':checked')) {
+    constraints.push("U"); 
+  }
+  if($('#add-column-constr-nn').is(':checked')) {
+    constraints.push("NN"); 
+  }
+  col_info.constr = constraints.join(', ');
+
+  if($('#add-column-key-type-none').is(':checked')){
+    console.log('None checked');
+    col_info.figure = "LineH";
+    col_info.color = "#7FBA00";
+  } else if($('#add-column-key-type-pk').is(':checked')) {
+    col_info.figure = "Ellipse";
+    col_info.color = "#F25022";
+  } else if($('#add-column-key-type-fk').is(':checked')) {
+    col_info.figure = "TriangleUp";
+    col_info.color = "#225cf2";
+  }
+
+  $('#add-column-name-input').removeClass('input-error');
+  ER.erDiag.AddColumn(ER.erDiag.selection, col_info);
+  $('#add-column-modal').modal('toggle'); 
+});
+
+
+$(document).on('click', '#submit-import-from-ddl-btn', function(){
+  var ddl = $('#import-from-ddl-input').val();
+  if( ! ddl) {
+    $('#import-from-ddl-input').addClass('input-error');
+    return false;
+  }
+
+  $('#import-from-ddl-input').removeClass('input-error');
+  $('#import-from-ddl-modal').modal('toggle');
+  submitCreateFromDDL(ddl);
+});
+
+
+
+
+
+
+
+
 
 function crudCreateUpdate($elem){
   var query_params = {
@@ -140,6 +244,8 @@ function crudCreateUpdate($elem){
 
   if(typeof $elem !== 'undefined') {
     query_params.diagram_id = $elem.closest('tr').data('unique-identifier');
+  } else {
+    query_params.new_diagram = 1;
   }
 
   ER.ajaxRequest.sendRequest({
@@ -157,10 +263,18 @@ function crudCreateUpdate($elem){
 }
 
 function submitCreateUpdate(silent){
+
+  var schema_json = JSON.parse(ER.erDiag.diag.model.toJson());
+  for(var i = 0; i < schema_json.nodeDataArray.length; i++){
+    schema_json.nodeDataArray[i].fields.splice(0, 1);
+  }
+
   var query_params = {
     view : 'save_diagram',
     action: 'create_or_update_diagram',
-    schema_json : ER.erDiag.diag.model.toJson()
+    schema_json : JSON.stringify(schema_json),
+    diagram_name : $('#diagram-name').val()
+
   };
 
   if($('#save-btn').data('diagram-id')) {
@@ -213,6 +327,52 @@ function crudDelete($elem){
     return false;
   }
 }
+
+function submitCreateFromDDL(ddl){
+  var query_params = {
+    view : 'home_page_ajax',
+    action: 'create_or_update_diagram',
+    diagram_name : $('#diagram-name').val(),
+    ddl : ddl,
+    dialect : $('#import-from-ddl-dialect').val()
+  };
+
+  ER.ajaxRequest.sendRequest({
+    data : query_params,
+    success : function(data){
+      if(data.indexOf('error-alert') > -1){
+        $(ER.default_err_container).html(data);
+        $(ER.default_err_container).fadeIn('slow');
+      } else {
+        $(ER.default_err_container).html('');
+        $(ER.default_container).html(data);
+      }
+    }
+  });
+
+}
+
+function downloadCanvas() {
+  var canvas = document.querySelector('#canvas-container canvas');
+    var link = document.getElementById('download-btn');
+    link.href = canvas.toDataURL("image/png");
+    link.download = $('#diagram-name').val();
+
+
+
+  
+  //container.width = originalWidth;
+  //container.height = originalHeight;
+}
+
+/** 
+ * The event handler for the link's onclick event. We give THIS as a
+ * parameter (=the link element), ID of the canvas and a filename.
+*/
+
+$(document).on('click', '#download-btn', function(){
+  downloadCanvas();
+});
 
 
 //Functions

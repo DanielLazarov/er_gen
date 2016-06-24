@@ -8,30 +8,6 @@
   function ERDiag(settings){
     this.settings = jQuery.extend({}, settings);
 
-
-    this.makeWidthBinding = function(idx) {
-        // These two conversion functions are closed over the IDX variable.
-        // This source-to-target conversion extracts a number from the Array at the given index.
-        function getColumnWidth(arr) {
-          if (Array.isArray(arr) && idx < arr.length) return arr[idx];
-          return NaN;
-        }
-        // This target-to-source conversion sets a number in the Array at the given index.
-        function setColumnWidth(w, data) {
-          var arr = data.widths;
-          if (!arr) arr = [];
-          if (idx >= arr.length) {
-            for (var i = arr.length; i <= idx; i++) arr[i] = NaN;  // default to NaN
-          }
-          arr[idx] = w;
-          return arr;  // need to return the Array (as the value of data.widths)
-        }
-        return [
-          { column: idx },
-          new go.Binding("width", "widths", getColumnWidth).makeTwoWay(setColumnWidth)
-        ]
-      }
-
     this.itemTemplate =
       go.GraphObject.make(
         go.Panel, 
@@ -39,7 +15,7 @@
         new go.Binding("portId", "name"),  // this Panel is a "port"
         { 
           background: "transparent",  // so this port's background can be picked by the mouse
-          fromSpot: go.Spot.RightSide,  // links only go from the right side to the left side
+          fromSpot: go.Spot.LeftSide,  // links only go from the right side to the left side
           toSpot: go.Spot.LeftSide,
           // allow drawing links from or to this port:
           fromLinkable: true, toLinkable: true 
@@ -62,7 +38,8 @@
             wrap: go.TextBlock.None,
             overflow: go.TextBlock.OverflowEllipsis, 
             // and disallow drawing links from or to this text:
-            fromLinkable: false, toLinkable: false
+            fromLinkable: true, toLinkable: true,
+            editable: true
           },
           new go.Binding("text", "name")
         ),
@@ -76,7 +53,31 @@
             overflow: go.TextBlock.OverflowEllipsis,
             editable: true
           },
-          new go.Binding("text", "info").makeTwoWay()
+          new go.Binding("text", "type").makeTwoWay()
+        ),
+        go.GraphObject.make(go.TextBlock,
+          {
+            column: 3,
+            margin: new go.Margin(0, 2),
+            stretch: go.GraphObject.Horizontal,
+            font: "13px sans-serif",
+            maxLines: 3,
+            overflow: go.TextBlock.OverflowEllipsis,
+            editable: true
+          },
+          new go.Binding("text", "constr").makeTwoWay()
+        ),
+        go.GraphObject.make(go.TextBlock,
+          {
+            column: 4,
+            margin: new go.Margin(0, 2),
+            stretch: go.GraphObject.Horizontal,
+            font: "13px sans-serif",
+            maxLines: 3,
+            overflow: go.TextBlock.OverflowEllipsis,
+            editable: true
+          },
+          new go.Binding("text", "default").makeTwoWay()
         )
      );
 
@@ -115,16 +116,21 @@
             defaultRowSeparatorStroke: "gray",
             itemTemplate: this.itemTemplate
           },
-          go.GraphObject.make(go.RowColumnDefinition, this.makeWidthBinding(0)),
-          go.GraphObject.make(go.RowColumnDefinition, this.makeWidthBinding(1)),
-          go.GraphObject.make(go.RowColumnDefinition, this.makeWidthBinding(2)),
+          //go.GraphObject.make(go.RowColumnDefinition, this.makeWidthBinding(0)),
+          //go.GraphObject.make(go.RowColumnDefinition, this.makeWidthBinding(1)),
+          //go.GraphObject.make(go.RowColumnDefinition, this.makeWidthBinding(2)),
+          go.GraphObject.make(go.RowColumnDefinition, { row: 1, separatorStrokeWidth: 1.5, separatorStroke: "black" }),//Draw dark lines
+          go.GraphObject.make(go.RowColumnDefinition, { column: 1, separatorStrokeWidth: 1.5, separatorStroke: "black" }),
+          go.GraphObject.make(go.RowColumnDefinition, { column: 2, separatorStrokeWidth: 1.5, separatorStroke: "black" }),
+          go.GraphObject.make(go.RowColumnDefinition, { column: 3, separatorStrokeWidth: 1.5, separatorStroke: "black" }),
+          go.GraphObject.make(go.RowColumnDefinition, { column: 4, separatorStrokeWidth: 1.5, separatorStroke: "black" }),
           new go.Binding("itemArray", "fields")
         )  // end Table Panel of items
       )  // end Vertical Panel
     );  // end Node 
 
     this.linkTemplate = go.GraphObject.make(
-      go.Link, { curve: go.Link.Bezier, relinkableFrom: true, relinkableTo: true, toShortLength: 10 },  // let user reconnect links
+      go.Link, { relinkableFrom: true, relinkableTo: true, routing: go.Link.AvoidsNodes},  // let user reconnect links
       go.GraphObject.make(go.Shape, { strokeWidth: 1.5 }),
       go.GraphObject.make(go.Shape, { toArrow: "Standard", stroke: null })
     );    
@@ -138,44 +144,128 @@
                   validCycle: go.Diagram.CycleAll,  //allow loops
                   "undoManager.isEnabled": false //dont allow history manager for now
     });
-    self.diag.toolManager.mouseDownTools.add(new RowResizingTool());//row resize tool
-    self.diag.toolManager.mouseDownTools.add(new ColumnResizingTool());//col resize tool
+    //self.diag.toolManager.mouseDownTools.add(new RowResizingTool());//row resize tool
+    //self.diag.toolManager.mouseDownTools.add(new ColumnResizingTool());//col resize tool
 
           // This template represents a whole "record".
     self.diag.nodeTemplate = this.nodeTemplate
     self.diag.linkTemplate = this.linkTemplate
 
-      self.diag.model =
-        go.GraphObject.make(go.GraphLinksModel,
-          {
-            linkFromPortIdProperty: "fromPort",
-            linkToPortIdProperty: "toPort",
-            // automatically update the model that is shown on this page
-            "Changed": function(e) {
-              console.log(self.diag.model.toJson());
-              //if (e.isTransactionFinished) showModel();
-            },
-            nodeDataArray: data.nodeDataArray,
-            linkDataArray: data.linkDataArray
-          });
+    for(var i = 0; i < data.nodeDataArray.length; i++) {
+      data.nodeDataArray[i].fields.unshift({"info": "",
+        "name": "Name",
+        "color": "#F25022",
+        "figure": "AsteriskLine",
+        "constr": "Constr",
+        "type" : "Type",
+        "default" : "Default"});
+    }
+
+    self.diag.model =
+      go.GraphObject.make(go.GraphLinksModel,
+        {
+          linkFromPortIdProperty: "fromPort",
+          linkToPortIdProperty: "toPort",
+          // automatically update the model that is shown on this page
+          "Changed": function(e) {
+            //console.log(self.diag.model.toJson());
+            //if (e.isTransactionFinished) showModel();
+          },
+          nodeDataArray: data.nodeDataArray,
+          linkDataArray: data.linkDataArray
+        }
+    );
+
+    self.diag.addDiagramListener('ChangedSelection', function(){
+        self.selection = self.diag.selection.first();
+     });
 
   };
 
   ERDiag.prototype.ReLoadDiag = function(data) {
     var self = this;
-      self.diag.model =
-        go.GraphObject.make(go.GraphLinksModel,
-          {
-            linkFromPortIdProperty: "fromPort",
-            linkToPortIdProperty: "toPort",
-            // automatically update the model that is shown on this page
-            "Changed": function(e) {
-              console.log(self.diag.model.toJson());
-              //if (e.isTransactionFinished) showModel();
-            },
-            nodeDataArray: data.nodeDataArray,
-            linkDataArray: data.linkDataArray
-          });
+
+    for(var i = 0; i < data.nodeDataArray.length; i++) {
+      data.nodeDataArray[i].fields.unshift({"info": "",
+        "name": "Name",
+        "color": "#F25022",
+        "figure": "AsteriskLine",
+        "constr": "Constr",
+        "type" : "Type",
+        "default" : "Default"});
+    }
+
+    self.diag.model =
+      go.GraphObject.make(go.GraphLinksModel,
+        {
+          linkFromPortIdProperty: "fromPort",
+          linkToPortIdProperty: "toPort",
+          // automatically update the model that is shown on this page
+          "Changed": function(e) {
+            console.log(self.diag.model.toJson());
+            //if (e.isTransactionFinished) showModel();
+          },
+          nodeDataArray: data.nodeDataArray,
+          linkDataArray: data.linkDataArray
+        });
+  };
+
+  ERDiag.prototype.AddNode = function(name) {
+    var self = this;
+
+    self.diag.startTransaction("addNode");
+    self.diag.model.addNodeData({
+      "key": name,
+      "loc": "0 0",
+      "fields": [
+        {
+          "info": "",
+          "name": "Name",
+          "color": "#F25022",
+          "figure": "AsteriskLine",
+          "constr": "Constr",
+          "type" : "Type",
+          "default" : "Default"
+        }
+      ],
+    });
+    self.diag.commitTransaction("addNode");
+  };
+
+  ERDiag.prototype.RemoveNode = function(node) {
+    var self = this;
+
+    self.diag.startTransaction("removeNode");
+    self.diag.model.removeNodeData(node.data);
+    self.diag.commitTransaction("removeNode");
+  };
+
+  ERDiag.prototype.AddColumn = function(node, column_data) {
+    var self = this;
+
+    if (node === null) return;
+
+    self.diag.startTransaction("addColumn");
+    self.diag.model.addArrayItem(node.data.fields, column_data);
+    self.diag.commitTransaction("addColumn");
+  };
+
+  ERDiag.prototype.RemoveColumn = function(node, column_name) {
+    var self = this;
+    
+    if (node === null) return;
+
+    for(var i = 1; i < node.data.fields.length; i++)
+    {
+      if(node.data.fields[i].name === column_name){
+        self.diag.startTransaction("removeColumn");
+        self.diag.model.removeArrayItem(node.data.fields, i);
+        self.diag.commitTransaction("removeColumn");
+        return true;
+      }
+    }
+    
+    return false;
   };
 
      
