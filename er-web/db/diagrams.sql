@@ -7,8 +7,6 @@ CREATE TABLE diagrams (
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE UNIQUE INDEX ON diagrams(name) WHERE is_deleted IS FALSE;
-
 CREATE TABLE last_diagram_by_session (
     id SERIAL PRIMARY KEY,
     sys_user_session_id INT UNIQUE NOT NULL REFERENCES sys_users_sessions(id), 

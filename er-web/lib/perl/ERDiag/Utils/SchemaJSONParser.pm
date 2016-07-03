@@ -118,7 +118,7 @@ sub FromSchemaToWeb($)
             my $constr = "";
             if(scalar @constrs_arr)
             {
-                $constr = join(@constrs_arr, ', ');
+                $constr = join(', ', @constrs_arr);
             }   
 
             my $color = "#7FBA00";
