@@ -65,6 +65,24 @@ sub CreateOrUpdateDiagram($)
     my $row = $sth->fetchrow_hashref;
     $$app{diagram_row} = $row;
 
+    $sth = $$app{dbh}->prepare(q{
+        UPDATE last_diagram_by_session
+        SET diagram_id = ?
+        WHERE sys_user_session_id = ? 
+    });
+    $sth->execute($$row{id}, $$app{session_row}{id});
+
+    if($sth->rows == 0)
+    {
+        $sth = $$app{dbh}->prepare(q{
+            INSERT INTO last_diagram_by_session(sys_user_session_id, diagram_id)
+            VALUES(?, ?)
+        });
+        $sth->execute($$app{session_row}{id}, $$row{id});
+        ASSERT($sth->rows == 1);
+    }
+
+
     return;
 }
 

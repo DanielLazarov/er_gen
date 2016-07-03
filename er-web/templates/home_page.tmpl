@@ -11,8 +11,6 @@
    <script type="text/javascript" src="js/libs/er-diag-0.0.1/er-diag-0.0.1.js"></script>
 
   <script type="text/javascript" src="js/libs/go-debug.js"></script>
-  <script type="text/javascript" src="js/libs/ColumnResizingTool.js"></script>
-  <script type="text/javascript" src="js/libs/RowResizingTool.js"></script>
 </head>
    <link rel="stylesheet" href="js/libs/bootstrap-3.3.6-dist/css/bootstrap.min.css">
    <link rel="stylesheet" href="css/main.css">
@@ -73,7 +71,13 @@
         <a id="import-btn" href="#" class="btn btn-primary" data-toggle="modal" data-target="#import-from-ddl-modal">Import from DDL</a>
         <TMPL_ELSE>
         <a id="download-btn" href="#" class="btn btn-warning">Save as Image</a>
+        <img src="images/ajax-loader.gif" id="save-as-image-loading" style="display:none;"/>
+        <a id="save-as-image-download-btn" style="display: none;" href="#" class="btn btn-primary">Download</a>
       </TMPL_IF>
+
+        <div style="position: absolute; top: -10000px; left: -10000px; width: 100px; height: 100px;" id="save-as-image-canvas-container">
+          <div id="canvas-container-shad" style="height: 100%; width: 100%; "></div>
+        </div>
       
       <a id="remove-column-btn" style="float:right; margin-left:0.5em;" href="#" class="btn btn-danger disabled" data-toggle="modal" data-target="#remove-column-modal">Remove column</a>
       <a id="remove-table-btn" style="float:right; margin-left:0.5em;" href="#" class="btn btn-danger disabled" data-toggle="modal" data-target="#remove-table-modal">Remove table</a>
@@ -234,7 +238,6 @@
   <script>
     document.getElementById("main-container").style.height = (window.innerHeight - 105) + "px";
     ER.erDiag = new window.ERDiag();
-    
     ER.erDiag.LoadDiag("canvas-container", JSON.parse('<TMPL_VAR NAME=SCHEMA_JSON DEFAULT={"linkDataArray":[],"nodeDataArray":[]}>'));
 
     ER.erDiag.diag.addDiagramListener('ChangedSelection', function(){
@@ -249,6 +252,9 @@
           $('#add-column-btn').removeClass('disabled');
         }
      });
+
+    ER.erDiagShad = new window.ERDiag();
+    ER.erDiagShad.LoadDiag("canvas-container-shad", JSON.parse('<TMPL_VAR NAME=SCHEMA_JSON DEFAULT={"linkDataArray":[],"nodeDataArray":[]}>'));
     
   </script>
 </div>

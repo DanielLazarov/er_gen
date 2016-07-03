@@ -353,22 +353,38 @@ function submitCreateFromDDL(ddl){
 }
 
 function downloadCanvas() {
+  
+  $('#save-as-image-download-btn').hide();
+  $('#save-as-image-loading').show();
+  var canvas_div = document.querySelector('#canvas-container div div');
   var canvas = document.querySelector('#canvas-container canvas');
-    var link = document.getElementById('download-btn');
-    link.href = canvas.toDataURL("image/png");
-    link.download = $('#diagram-name').val();
+  
 
+  var patt = new RegExp("[0-9]*");
+  var calc_height = +patt.exec(canvas_div.style.height)[0]; //+ is for convertion to number
+  var calc_width = +patt.exec(canvas_div.style.width)[0];
 
+  var real_height = (calc_height > canvas.height) ? calc_height : canvas.height;
+  var real_width = (calc_width > canvas.width) ? calc_width : canvas.width;
+
+  var new_canvas_div = document.querySelector('#save-as-image-canvas-container');
+  new_canvas_div.style.height = real_height + 'px';
+  new_canvas_div.style.width = real_width + 'px';
+
+  ER.erDiagShad.ReLoadDiag(JSON.parse(ER.erDiag.diag.model.toJson()));
+
+  setTimeout(function(){
+    $('#save-as-image-loading').hide();
+        var new_canvas = document.querySelector('#canvas-container-shad canvas');
+        var link = document.getElementById('save-as-image-download-btn');
+        link.href = new_canvas.toDataURL("image/png");
+        link.download = $('#diagram-name').val();
+        $('#save-as-image-download-btn').show();
+  }, 2000);
 
   
-  //container.width = originalWidth;
-  //container.height = originalHeight;
 }
 
-/** 
- * The event handler for the link's onclick event. We give THIS as a
- * parameter (=the link element), ID of the canvas and a filename.
-*/
 
 $(document).on('click', '#download-btn', function(){
   downloadCanvas();

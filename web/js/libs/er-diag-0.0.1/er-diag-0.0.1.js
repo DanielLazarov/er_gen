@@ -185,15 +185,15 @@
   ERDiag.prototype.ReLoadDiag = function(data) {
     var self = this;
 
-    for(var i = 0; i < data.nodeDataArray.length; i++) {
-      data.nodeDataArray[i].fields.unshift({"info": "",
-        "name": "Name",
-        "color": "#F25022",
-        "figure": "AsteriskLine",
-        "constr": "Constr",
-        "type" : "Type",
-        "default" : "Default"});
-    }
+    // for(var i = 0; i < data.nodeDataArray.length; i++) {
+    //   data.nodeDataArray[i].fields.unshift({"info": "",
+    //     "name": "Name",
+    //     "color": "#F25022",
+    //     "figure": "AsteriskLine",
+    //     "constr": "Constr",
+    //     "type" : "Type",
+    //     "default" : "Default"});
+    // }
 
     self.diag.model =
       go.GraphObject.make(go.GraphLinksModel,
@@ -202,7 +202,7 @@
           linkToPortIdProperty: "toPort",
           // automatically update the model that is shown on this page
           "Changed": function(e) {
-            console.log(self.diag.model.toJson());
+            //console.log(self.diag.model.toJson());
             //if (e.isTransactionFinished) showModel();
           },
           nodeDataArray: data.nodeDataArray,
